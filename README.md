@@ -137,7 +137,7 @@ Parse and validate JSON against a Pydantic model.
 **Parameters:**
 - `json_string: str` — The JSON string to parse and validate
 - `model: type[BaseModel]` — The Pydantic model to validate against
-- `filename: str = "input.json"` — Filename to display in error locations
+- `filename: str = ""` — Label to display in error locations (optional)
 - `colors: bool = True` — Enable ANSI colors
 - `context_lines: int = 4` — Number of context lines before/after error
 - `throw: bool = False` — Raise exception instead of returning failure
@@ -151,7 +151,7 @@ Format an existing `ValidationError` with source context.
 **Parameters:**
 - `error: ValidationError` — The Pydantic error to format
 - `json_string: str` — The original JSON string
-- `filename: str = "input.json"` — Filename to display
+- `filename: str = ""` — Label to display (optional)
 - `colors: bool = True` — Enable ANSI colors
 - `context_lines: int = 4` — Number of context lines
 

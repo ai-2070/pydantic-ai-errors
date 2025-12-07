@@ -15,7 +15,7 @@ class RenderOptions:
     """Options for rendering diagnostics."""
 
     colors: bool = True
-    filename: str = "input.json"
+    filename: str = ""
     context_lines: int = 4
 
 

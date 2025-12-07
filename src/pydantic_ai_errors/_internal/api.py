@@ -57,7 +57,7 @@ def parse_json(
     json_string: str,
     model: type[T],
     *,
-    filename: str = "input.json",
+    filename: str = "",
     colors: bool = True,
     context_lines: int = 4,
     throw: bool = False,
@@ -111,7 +111,7 @@ def format_pydantic_error(
     error: ValidationError,
     json_string: str,
     *,
-    filename: str = "input.json",
+    filename: str = "",
     colors: bool = True,
     context_lines: int = 4,
 ) -> str:
@@ -141,7 +141,7 @@ def format_pydantic_error(
 def create_validator(
     model: type[T],
     *,
-    filename: str = "input.json",
+    filename: str = "",
     colors: bool = True,
     context_lines: int = 4,
 ) -> Callable[[str], ValidationResult[T]]:
