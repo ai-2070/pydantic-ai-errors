@@ -7,7 +7,7 @@ name = "pydantic-error-windows"
 version = "1.0.0"
 description = "Beautiful, AI-friendly Pydantic error formatting with Rust-style diagnostics"
 readme = "README.md"
-license = "Apache-2.0"
+license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [
     { name = "pydantic-error-windows contributors" }
