@@ -5,7 +5,7 @@ High-level API for parsing and validating JSON with beautiful error output.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Generic, TypeVar
+from typing import Callable, Generic, TypeVar
 
 from pydantic import BaseModel, ValidationError
 

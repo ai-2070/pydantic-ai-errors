@@ -4,7 +4,7 @@ Renders diagnostics in a beautiful Rust-style format.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .diagnostics import Diagnostic, DiagnosticSeverity
 from .source_map import JsonSourceMap
