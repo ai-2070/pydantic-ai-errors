@@ -3,14 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pydantic-error-windows"
+name = "pydantic-ai-errors"
 version = "1.0.0"
 description = "Beautiful, AI-friendly Pydantic error formatting with Rust-style diagnostics"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [
-    { name = "pydantic-error-windows contributors" }
+    { name = "AI 2070 Contributors" }
 ]
 keywords = [
     "pydantic",
@@ -48,11 +48,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/pydantic-error-windows"
-Repository = "https://github.com/example/pydantic-error-windows"
+Homepage = "https://github.com/ai-2070/pydantic-ai-errors"
+Repository = "https://github.com/ai-2070/pydantic-ai-errors"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pydantic_error_windows"]
+packages = ["src/pydantic_ai_errors"]
 
 [tool.ruff]
 line-length = 100

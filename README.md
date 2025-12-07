@@ -1,4 +1,4 @@
-# pydantic-error-windows
+# Pydantic AI Errors
 
 Beautiful, AI-friendly Pydantic error formatting with Rust-style diagnostics.
 
@@ -43,8 +43,14 @@ error[PYD002]: type mismatch for field `user.age`
 
 ## Installation
 
+# uv
 ```bash
-pip install pydantic-error-windows
+uv add pydantic-ai-errors
+```
+
+# pip
+```bash
+pip install pydantic-ai-errors
 ```
 
 Requires Pydantic v2.
@@ -55,7 +61,7 @@ Requires Pydantic v2.
 
 ```python
 from pydantic import BaseModel, Field
-from pydantic_error_windows import parse_json
+from pydantic_ai_errors import parse_json
 
 
 class User(BaseModel):
@@ -83,7 +89,7 @@ If you already have a `ValidationError` from a previous validation:
 
 ```python
 from pydantic import BaseModel, ValidationError
-from pydantic_error_windows import format_pydantic_error
+from pydantic_ai_errors import format_pydantic_error
 
 
 class Config(BaseModel):
@@ -103,7 +109,7 @@ except ValidationError as e:
 
 ```python
 from pydantic import BaseModel, Field
-from pydantic_error_windows import create_validator
+from pydantic_ai_errors import create_validator
 
 
 class Config(BaseModel):

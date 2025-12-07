@@ -1,10 +1,10 @@
 """
-Example usage of pydantic-error-windows
+Example usage of pydantic-ai-errors
 """
 
 from pydantic import BaseModel, Field
 
-from pydantic_error_windows import parse_json
+from pydantic_ai_errors import parse_json
 
 
 class Address(BaseModel):

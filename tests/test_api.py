@@ -3,7 +3,7 @@
 import pytest
 from pydantic import BaseModel, Field
 
-from pydantic_error_windows import (
+from pydantic_ai_errors import (
     PydanticValidationError,
     create_validator,
     format_pydantic_error,
