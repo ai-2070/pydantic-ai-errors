@@ -76,7 +76,7 @@ json_input = '''{
   "email": "not-valid"
 }'''
 
-result = parse_json(json_input, User, filename="user.json")  # label (optional)
+result = parse_json(json_input, User, filename="user.json")  # filename=label (optional)
 
 if not result.success:
     print(result.formatted)
