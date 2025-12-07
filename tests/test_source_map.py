@@ -2,7 +2,7 @@
 
 import pytest
 
-from pydantic_error_windows.source_map import parse_json_with_source_map
+from pydantic_error_windows import parse_json_with_source_map
 
 
 class TestParseJsonWithSourceMap:
