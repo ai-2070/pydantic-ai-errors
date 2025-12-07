@@ -101,7 +101,7 @@ json_string = '{"name": 123}'
 try:
     Config.model_validate_json(json_string)
 except ValidationError as e:
-    formatted = format_pydantic_error(e, json_string, filename="config.json")
+    formatted = format_pydantic_error(e, json_string, filename="config.json")  # filename=label (optional)
     print(formatted)
 ```
 
@@ -117,7 +117,7 @@ class Config(BaseModel):
     host: str
 
 
-validate_config = create_validator(Config, filename="config.json", colors=True)
+validate_config = create_validator(Config, filename="config.json", colors=True)  # filename=label (optional)
 
 result = validate_config(json_string)
 if not result.success:
