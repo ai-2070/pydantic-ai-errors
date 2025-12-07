@@ -43,12 +43,12 @@ error[PYD002]: type mismatch for field `user.age`
 
 ## Installation
 
-# uv
+### uv
 ```bash
 uv add pydantic-ai-errors
 ```
 
-# pip
+### pip
 ```bash
 pip install pydantic-ai-errors
 ```
