@@ -39,6 +39,8 @@ error[PYD002]: type mismatch for field `user.age`
   - Underlined error locations with `^^^`
   - Actionable help suggestions (`= help: ...`)
 - **ANSI color support** — Colorized output for terminal display (can be disabled)
+- **Compact mode** — Show all errors in a single error window for a consolidated view
+- **Custom error messages** — Override default error messages per field for user-friendly output
 - **AI-friendly** — Structured output that's easy for LLMs to parse and act on
 
 ## Installation
@@ -81,6 +83,49 @@ result = parse_json(json_input, User, filename="user.json")  # filename=label (o
 if not result.success:
     print(result.formatted)
     # Also available: result.diagnostics for programmatic access
+```
+
+### Compact Mode
+
+Show all errors in a single consolidated error window:
+
+```python
+result = parse_json(json_input, User, filename="user.json", compact=True)
+```
+
+Output:
+```
+error[PYD001]: invalid value for field `name`
+error[PYD002]: type mismatch for field `age`
+error[PYD003]: invalid email for field `email`
+  --> user.json:2:11
+  |
+1 | {
+2 |   "name": "",
+  |           ^^ expected a string (min 2 chars), found string ""
+3 |   "age": "sixteen",
+  |          ^^^^^^^^^ expected integer, found string "sixteen"
+4 |   "email": "not-valid"
+  |
+   = help: provide a string with at least 2 characters
+   = help: convert the string "sixteen" to an integer
+```
+
+### Custom Error Messages
+
+Override default error messages for specific fields:
+
+```python
+result = parse_json(
+    json_input,
+    User,
+    filename="user.json",
+    custom_messages={
+        ("name",): "Username must be at least 2 characters",
+        ("age",): "Please enter a valid age as a number",
+        ("user", "email"): "Invalid email format",  # for nested fields
+    },
+)
 ```
 
 ### Format Existing Pydantic Error
@@ -141,6 +186,8 @@ Parse and validate JSON against a Pydantic model.
 - `colors: bool = True` — Enable ANSI colors
 - `context_lines: int = 4` — Number of context lines before/after error
 - `throw: bool = False` — Raise exception instead of returning failure
+- `compact: bool = False` — Show all errors in a single error window
+- `custom_messages: dict[tuple, str] = None` — Custom error messages per field path
 
 **Returns:** `ValidationSuccess[T] | ValidationFailure`
 
@@ -154,12 +201,22 @@ Format an existing `ValidationError` with source context.
 - `filename: str = ""` — Label to display (optional)
 - `colors: bool = True` — Enable ANSI colors
 - `context_lines: int = 4` — Number of context lines
+- `compact: bool = False` — Show all errors in a single error window
+- `custom_messages: dict[tuple, str] = None` — Custom error messages per field path
 
 **Returns:** `str`
 
 ### `create_validator(model, **default_options)`
 
 Create a reusable validator function.
+
+**Parameters:**
+- `model: type[BaseModel]` — The Pydantic model to validate against
+- `filename: str = ""` — Default label to display in error locations
+- `colors: bool = True` — Enable ANSI colors
+- `context_lines: int = 4` — Number of context lines
+- `compact: bool = False` — Show all errors in a single error window
+- `custom_messages: dict[tuple, str] = None` — Custom error messages per field path
 
 **Returns:** `Callable[[str], ValidationResult[T]]`
 

@@ -6,6 +6,8 @@ Beautiful, AI-friendly Pydantic error formatting with Rust-style diagnostics.
 
 from ._internal.api import (
     PydanticValidationError,
+    ValidationFailure,
+    ValidationSuccess,
     create_validator,
     format_pydantic_error,
     parse_json,
@@ -38,6 +40,8 @@ __all__ = [
     "format_pydantic_error",
     "create_validator",
     "PydanticValidationError",
+    "ValidationSuccess",
+    "ValidationFailure",
 ]
 
 __version__ = "1.0.0"

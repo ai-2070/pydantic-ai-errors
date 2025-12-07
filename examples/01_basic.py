@@ -4,7 +4,7 @@ Example usage of pydantic-ai-errors
 
 from pydantic import BaseModel, Field
 
-from pydantic_ai_errors import parse_json
+from pydantic_ai_errors import ValidationFailure, parse_json
 
 
 class Address(BaseModel):
@@ -52,7 +52,7 @@ def main() -> None:
         colors=True,
     )
 
-    if not result.success:
+    if isinstance(result, ValidationFailure):
         print(result.formatted)
 
 

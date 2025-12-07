@@ -5,13 +5,13 @@ High-level API for parsing and validating JSON with beautiful error output.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Generic, TypeVar
+from typing import Callable, Generic, Literal, TypeVar
 
 from pydantic import BaseModel, ValidationError
 
 from .diagnostics import Diagnostic, pydantic_error_to_diagnostics
 from .renderer import RenderOptions, render_diagnostics
-from .source_map import parse_json_with_source_map
+from .source_map import JsonPath, parse_json_with_source_map
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -20,26 +20,17 @@ T = TypeVar("T", bound=BaseModel)
 class ValidationSuccess(Generic[T]):
     """Successful validation result."""
 
-    success: bool
     data: T
-
-    def __init__(self, data: T) -> None:
-        self.success = True
-        self.data = data
+    success: Literal[True] = True
 
 
 @dataclass
 class ValidationFailure:
     """Failed validation result."""
 
-    success: bool
     formatted: str
     diagnostics: list[Diagnostic]
-
-    def __init__(self, formatted: str, diagnostics: list[Diagnostic]) -> None:
-        self.success = False
-        self.formatted = formatted
-        self.diagnostics = diagnostics
+    success: Literal[False] = False
 
 
 ValidationResult = ValidationSuccess[T] | ValidationFailure
@@ -47,6 +38,8 @@ ValidationResult = ValidationSuccess[T] | ValidationFailure
 
 class PydanticValidationError(Exception):
     """Exception raised when validation fails and throw=True."""
+
+    diagnostics: list[Diagnostic]
 
     def __init__(self, formatted: str, diagnostics: list[Diagnostic]) -> None:
         super().__init__(formatted)
@@ -61,6 +54,8 @@ def parse_json(
     colors: bool = True,
     context_lines: int = 4,
     throw: bool = False,
+    compact: bool = False,
+    custom_messages: dict[JsonPath, str] | None = None,
 ) -> ValidationResult[T]:
     """
     Parse and validate JSON against a Pydantic model.
@@ -75,6 +70,9 @@ def parse_json(
         colors: Whether to use ANSI colors in output.
         context_lines: Number of context lines to show around errors.
         throw: If True, raise PydanticValidationError instead of returning failure.
+        compact: If True, show all errors in a single error window.
+        custom_messages: Dict mapping field paths to custom error messages.
+            Keys are tuples like ("user", "name") or ("items", 0, "price").
 
     Returns:
         ValidationSuccess or ValidationFailure.
@@ -98,6 +96,8 @@ def parse_json(
             colors=colors,
             filename=filename,
             context_lines=context_lines,
+            compact=compact,
+            custom_messages=custom_messages or {},
         )
         formatted = render_diagnostics(diagnostics, source_map, options)
 
@@ -114,6 +114,8 @@ def format_pydantic_error(
     filename: str = "",
     colors: bool = True,
     context_lines: int = 4,
+    compact: bool = False,
+    custom_messages: dict[JsonPath, str] | None = None,
 ) -> str:
     """
     Format an existing Pydantic ValidationError with source context.
@@ -124,6 +126,9 @@ def format_pydantic_error(
         filename: The filename to display in error messages.
         colors: Whether to use ANSI colors in output.
         context_lines: Number of context lines to show around errors.
+        compact: If True, show all errors in a single error window.
+        custom_messages: Dict mapping field paths to custom error messages.
+            Keys are tuples like ("user", "name") or ("items", 0, "price").
 
     Returns:
         Formatted error string.
@@ -134,6 +139,8 @@ def format_pydantic_error(
         colors=colors,
         filename=filename,
         context_lines=context_lines,
+        compact=compact,
+        custom_messages=custom_messages or {},
     )
     return render_diagnostics(diagnostics, source_map, options)
 
@@ -144,6 +151,8 @@ def create_validator(
     filename: str = "",
     colors: bool = True,
     context_lines: int = 4,
+    compact: bool = False,
+    custom_messages: dict[JsonPath, str] | None = None,
 ) -> Callable[[str], ValidationResult[T]]:
     """
     Create a reusable validator function for a Pydantic model.
@@ -153,6 +162,9 @@ def create_validator(
         filename: Default filename to display in error messages.
         colors: Default for whether to use ANSI colors.
         context_lines: Default number of context lines to show.
+        compact: If True, show all errors in a single error window.
+        custom_messages: Dict mapping field paths to custom error messages.
+            Keys are tuples like ("user", "name") or ("items", 0, "price").
 
     Returns:
         A validator function that takes a JSON string and returns ValidationResult.
@@ -165,6 +177,8 @@ def create_validator(
             filename=filename,
             colors=colors,
             context_lines=context_lines,
+            compact=compact,
+            custom_messages=custom_messages,
         )
 
     return validator

@@ -78,12 +78,17 @@ class TestParseJsonWithSourceMap:
 }"""
         _, source_map = parse_json_with_source_map(json)
 
-        assert source_map.get(("a",))
-        assert source_map.get(("a",)).value_start.line == 2
-        assert source_map.get(("b",))
-        assert source_map.get(("b",)).value_start.line == 3
-        assert source_map.get(("c",))
-        assert source_map.get(("c",)).value_start.line == 4
+        span_a = source_map.get(("a",))
+        assert span_a is not None
+        assert span_a.value_start.line == 2
+
+        span_b = source_map.get(("b",))
+        assert span_b is not None
+        assert span_b.value_start.line == 3
+
+        span_c = source_map.get(("c",))
+        assert span_c is not None
+        assert span_c.value_start.line == 4
 
     def test_provides_context_lines(self) -> None:
         json = """{

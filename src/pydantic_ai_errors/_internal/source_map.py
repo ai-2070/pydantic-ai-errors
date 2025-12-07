@@ -34,6 +34,9 @@ JsonPath = tuple[str | int, ...]
 class JsonSourceMap:
     """Maps JSON paths to their source locations."""
 
+    source: str
+    lines: list[str]
+
     def __init__(self, source: str) -> None:
         self.source = source
         self.lines = source.split("\n")
@@ -62,6 +65,12 @@ class JsonSourceMap:
 
 class _JsonParser:
     """JSON parser that tracks source locations."""
+
+    source: str
+    pos: int
+    line: int
+    column: int
+    source_map: JsonSourceMap
 
     def __init__(self, source: str) -> None:
         self.source = source

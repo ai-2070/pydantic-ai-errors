@@ -138,9 +138,10 @@ def _generate_help(error_type: str, ctx: dict[str, Any] | None, received_value: 
         return f"provide a number {op} {limit}"
 
     if error_type == "value_error":
-        if "email" in str(ctx.get("error", "")).lower():
+        error_str = str(ctx.get("error", "")).lower()
+        if "email" in error_str:
             return "provide a valid email address (e.g., user@example.com)"
-        if "url" in str(ctx.get("error", "")).lower():
+        if "url" in error_str:
             return "provide a valid URL (e.g., https://example.com)"
 
     if error_type == "enum":
@@ -156,6 +157,54 @@ def _generate_help(error_type: str, ctx: dict[str, Any] | None, received_value: 
 
     if error_type == "extra_forbidden":
         return "remove this unrecognized field"
+
+    # UUID validation
+    if error_type == "uuid_parsing":
+        return "provide a valid UUID (e.g., 550e8400-e29b-41d4-a716-446655440000)"
+
+    # URL validation
+    if error_type == "url_parsing":
+        return "provide a valid URL (e.g., https://example.com)"
+
+    # Date/time validation
+    if error_type in ("datetime_parsing", "datetime_from_date_parsing"):
+        return "provide a valid datetime (e.g., 2024-01-15T10:30:00)"
+
+    if error_type in ("date_parsing", "date_from_datetime_parsing"):
+        return "provide a valid date (e.g., 2024-01-15)"
+
+    if error_type == "time_parsing":
+        return "provide a valid time (e.g., 10:30:00)"
+
+    # Decimal validation
+    if error_type == "decimal_parsing":
+        return "provide a valid decimal number"
+
+    # Collection types
+    if error_type == "list_type":
+        return "provide a list/array value"
+
+    if error_type == "dict_type":
+        return "provide an object/dictionary value"
+
+    if error_type == "set_type":
+        return "provide a set of unique values"
+
+    # Path validation
+    if error_type == "path_type":
+        return "provide a valid file path as a string"
+
+    # Boolean validation
+    if error_type == "bool_parsing":
+        return "provide a boolean value (true or false)"
+
+    # JSON validation
+    if error_type == "json_invalid":
+        return "provide valid JSON"
+
+    # Bytes validation
+    if error_type == "bytes_type":
+        return "provide a bytes or string value"
 
     return None
 
@@ -203,6 +252,54 @@ def _format_expected(error_type: str, ctx: dict[str, Any] | None) -> str | None:
     if error_type == "missing":
         return "required field"
 
+    # UUID
+    if error_type == "uuid_parsing":
+        return "valid UUID"
+
+    # URL
+    if error_type == "url_parsing":
+        return "valid URL"
+
+    # Date/time types
+    if error_type in ("datetime_parsing", "datetime_from_date_parsing"):
+        return "valid datetime"
+
+    if error_type in ("date_parsing", "date_from_datetime_parsing"):
+        return "valid date"
+
+    if error_type == "time_parsing":
+        return "valid time"
+
+    # Decimal
+    if error_type == "decimal_parsing":
+        return "decimal number"
+
+    # Collection types
+    if error_type == "list_type":
+        return "array"
+
+    if error_type == "dict_type":
+        return "object"
+
+    if error_type == "set_type":
+        return "array of unique values"
+
+    # Path
+    if error_type == "path_type":
+        return "file path string"
+
+    # Boolean parsing
+    if error_type == "bool_parsing":
+        return "boolean"
+
+    # JSON
+    if error_type == "json_invalid":
+        return "valid JSON"
+
+    # Bytes
+    if error_type == "bytes_type":
+        return "bytes or string"
+
     return None
 
 
@@ -233,10 +330,59 @@ def _generate_message(error_type: str, path: JsonPath, ctx: dict[str, Any] | Non
         return f"unrecognized field `{path_str}`"
 
     if error_type == "value_error":
-        if "email" in str(ctx.get("error", "")).lower():
+        error_str = str(ctx.get("error", "")).lower()
+        if "email" in error_str:
             return f"invalid email for field `{path_str}`"
-        if "url" in str(ctx.get("error", "")).lower():
+        if "url" in error_str:
             return f"invalid URL for field `{path_str}`"
+
+    # UUID
+    if error_type == "uuid_parsing":
+        return f"invalid UUID for field `{path_str}`"
+
+    # URL
+    if error_type == "url_parsing":
+        return f"invalid URL for field `{path_str}`"
+
+    # Date/time types
+    if error_type in ("datetime_parsing", "datetime_from_date_parsing"):
+        return f"invalid datetime for field `{path_str}`"
+
+    if error_type in ("date_parsing", "date_from_datetime_parsing"):
+        return f"invalid date for field `{path_str}`"
+
+    if error_type == "time_parsing":
+        return f"invalid time for field `{path_str}`"
+
+    # Decimal
+    if error_type == "decimal_parsing":
+        return f"invalid decimal for field `{path_str}`"
+
+    # Collection types
+    if error_type == "list_type":
+        return f"type mismatch for field `{path_str}`"
+
+    if error_type == "dict_type":
+        return f"type mismatch for field `{path_str}`"
+
+    if error_type == "set_type":
+        return f"type mismatch for field `{path_str}`"
+
+    # Path
+    if error_type == "path_type":
+        return f"invalid path for field `{path_str}`"
+
+    # Boolean parsing
+    if error_type == "bool_parsing":
+        return f"invalid boolean for field `{path_str}`"
+
+    # JSON
+    if error_type == "json_invalid":
+        return f"invalid JSON for field `{path_str}`"
+
+    # Bytes
+    if error_type == "bytes_type":
+        return f"type mismatch for field `{path_str}`"
 
     return f"validation error for field `{path_str}`"
 

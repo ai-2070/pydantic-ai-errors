@@ -4,10 +4,10 @@ Renders diagnostics in a beautiful Rust-style format.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .diagnostics import Diagnostic, DiagnosticSeverity
-from .source_map import JsonSourceMap
+from .source_map import JsonPath, JsonSourceMap
 
 
 @dataclass
@@ -17,6 +17,8 @@ class RenderOptions:
     colors: bool = True
     filename: str = ""
     context_lines: int = 4
+    compact: bool = False
+    custom_messages: dict[JsonPath, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -60,13 +62,16 @@ def render_diagnostic(
 
     lines: list[str] = []
 
+    # Use custom message if provided for this path
+    message = options.custom_messages.get(diagnostic.path, diagnostic.message)
+
     # Header: error[PYD001]: message
     severity_color = c.red if diagnostic.severity == DiagnosticSeverity.ERROR else c.yellow
     header = _colorize(
         _colorize(f"{diagnostic.severity.value}[{diagnostic.code}]", c.bold),
         severity_color,
     )
-    lines.append(f"{header}: {_colorize(diagnostic.message, c.bold)}")
+    lines.append(f"{header}: {_colorize(message, c.bold)}")
 
     if diagnostic.span:
         value_start = diagnostic.span.value_start
@@ -113,10 +118,11 @@ def render_diagnostic(
 
                 padding = " " * start_col
                 underline = "^" * underline_length
-                lines.append(
+                annotation_line = (
                     f"{' ' * (gutter_width + 1)}{pipe} {padding}"
-                    f"{_colorize(underline, c.red)} {_colorize(annotation_msg, c.red)}"
+                    + f"{_colorize(underline, c.red)} {_colorize(annotation_msg, c.red)}"
                 )
+                lines.append(annotation_line)
 
         # Closing gutter
         lines.append(f"{' ' * (gutter_width + 1)}{pipe}")
@@ -131,10 +137,113 @@ def render_diagnostic(
     return "\n".join(lines)
 
 
+def _render_compact(
+    diagnostics: list[Diagnostic],
+    source_map: JsonSourceMap,
+    options: RenderOptions,
+) -> str:
+    """Render all diagnostics in a single compact window."""
+    c = _ANSI_COLORS if options.colors else _NO_COLORS
+    lines: list[str] = []
+
+    # Collect all error lines and their diagnostics
+    line_diagnostics: dict[int, list[Diagnostic]] = {}
+    for diag in diagnostics:
+        if diag.span:
+            line_num = diag.span.value_start.line
+            if line_num not in line_diagnostics:
+                line_diagnostics[line_num] = []
+            line_diagnostics[line_num].append(diag)
+
+    if not line_diagnostics:
+        # No spans, fall back to non-compact
+        return "\n\n".join(render_diagnostic(d, source_map, options) for d in diagnostics)
+
+    # Print all error headers first
+    for diag in diagnostics:
+        message = options.custom_messages.get(diag.path, diag.message)
+        severity_color = c.red if diag.severity == DiagnosticSeverity.ERROR else c.yellow
+        header = _colorize(
+            _colorize(f"{diag.severity.value}[{diag.code}]", c.bold),
+            severity_color,
+        )
+        lines.append(f"{header}: {_colorize(message, c.bold)}")
+
+    # Calculate the line range to display
+    min_error_line = min(line_diagnostics.keys())
+    max_error_line = max(line_diagnostics.keys())
+    start_line = max(1, min_error_line - options.context_lines)
+    end_line = min(len(source_map.lines), max_error_line + options.context_lines)
+
+    # Location pointer for first error
+    first_diag = diagnostics[0]
+    if first_diag.span:
+        arrow = _colorize("-->", c.blue)
+        lines.append(
+            f"  {arrow} {options.filename}:{first_diag.span.value_start.line}:{first_diag.span.value_start.column}"
+        )
+
+    # Calculate gutter width
+    gutter_width = len(str(end_line))
+    pipe = _colorize("|", c.blue)
+
+    # Empty gutter line
+    lines.append(f"{' ' * (gutter_width + 1)}{pipe}")
+
+    # Render all context lines with annotations
+    for line_number in range(start_line, end_line + 1):
+        content = source_map.get_line_content(line_number)
+        line_num_str = str(line_number).rjust(gutter_width)
+        lines.append(f"{_colorize(line_num_str, c.blue)} {pipe} {content}")
+
+        # If there are diagnostics on this line, add underlines
+        if line_number in line_diagnostics:
+            for diag in line_diagnostics[line_number]:
+                if diag.span:
+                    value_start = diag.span.value_start
+                    value_end = diag.span.value_end
+                    start_col = value_start.column - 1
+
+                    if value_start.line == value_end.line:
+                        underline_length = max(1, value_end.column - value_start.column)
+                    else:
+                        underline_length = max(1, len(content) - start_col)
+
+                    # Build annotation message
+                    annotation_msg = ""
+                    if diag.expected and diag.received:
+                        annotation_msg = f"expected {diag.expected}, found {diag.received}"
+                    elif diag.expected:
+                        annotation_msg = f"expected {diag.expected}"
+
+                    padding = " " * start_col
+                    underline = "^" * underline_length
+                    annotation_line = (
+                        f"{' ' * (gutter_width + 1)}{pipe} {padding}"
+                        + f"{_colorize(underline, c.red)} {_colorize(annotation_msg, c.red)}"
+                    )
+                    lines.append(annotation_line)
+
+    # Closing gutter
+    lines.append(f"{' ' * (gutter_width + 1)}{pipe}")
+
+    # Help messages for all diagnostics
+    eq = _colorize("=", c.blue)
+    help_label = _colorize("help", c.cyan)
+    for diag in diagnostics:
+        if diag.help:
+            lines.append(f"{' ' * (gutter_width + 1)}{eq} {help_label}: {diag.help}")
+
+    return "\n".join(lines)
+
+
 def render_diagnostics(
     diagnostics: list[Diagnostic],
     source_map: JsonSourceMap,
     options: RenderOptions | None = None,
 ) -> str:
     """Render multiple diagnostics as a formatted string."""
+    options = options or RenderOptions()
+    if options.compact:
+        return _render_compact(diagnostics, source_map, options)
     return "\n\n".join(render_diagnostic(d, source_map, options) for d in diagnostics)
