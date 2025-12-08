@@ -2,6 +2,8 @@
 
 Beautiful, AI-friendly Pydantic error formatting with Rust-style diagnostics.
 
+> Your LLMs struggling to interpret Pydantic errors? Try Pydantic AI Errors!
+
 ```
 error[PYD001]: invalid value for field `user.name`
   --> input.json:3:13
