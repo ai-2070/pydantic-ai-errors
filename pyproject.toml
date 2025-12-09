@@ -10,7 +10,7 @@ readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [
-    { name = "AI 2070 Contributors" }
+    { name = "AI2070 Contributors" }
 ]
 keywords = [
     "pydantic",
